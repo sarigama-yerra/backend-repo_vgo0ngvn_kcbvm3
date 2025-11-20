@@ -11,38 +11,41 @@ Model name is converted to lowercase for the collection name:
 - BlogPost -> "blogs" collection
 """
 
-from pydantic import BaseModel, Field
-from typing import Optional
+from pydantic import BaseModel, Field, EmailStr
+from typing import Optional, Literal
 
-# Example schemas (replace with your own):
-
-class User(BaseModel):
+class Caroffer(BaseModel):
     """
-    Users collection schema
-    Collection name: "user" (lowercase of class name)
+    Long-term car rental offers
+    Collection name: "caroffer"
+    """
+    brand: str = Field(..., description="Car brand")
+    model: str = Field(..., description="Car model")
+    monthly_price: float = Field(..., ge=0, description="Monthly rental price")
+    upfront: float = Field(0, ge=0, description="Upfront payment (anticipo)")
+    term_months: int = Field(..., ge=12, le=60, description="Contract duration in months")
+    annual_km: int = Field(..., ge=10000, description="Included kilometers per year")
+    fuel_type: Literal['benzina','diesel','ibrida','elettrica','gpl','metano'] = Field(..., description="Fuel type")
+    transmission: Literal['manuale','automatico'] = Field(..., description="Transmission")
+    body_type: Literal['berlina','suv','citycar','station','cabrio','coupé','monovolume','altro'] = Field('altro', description="Body type")
+    image_url: Optional[str] = Field(None, description="Image URL")
+    availability: bool = Field(True, description="Offer available")
+
+class Lead(BaseModel):
+    """
+    Leads / Quote requests captured from website
+    Collection name: "lead"
     """
     name: str = Field(..., description="Full name")
-    email: str = Field(..., description="Email address")
-    address: str = Field(..., description="Address")
-    age: Optional[int] = Field(None, ge=0, le=120, description="Age in years")
-    is_active: bool = Field(True, description="Whether user is active")
-
-class Product(BaseModel):
-    """
-    Products collection schema
-    Collection name: "product" (lowercase of class name)
-    """
-    title: str = Field(..., description="Product title")
-    description: Optional[str] = Field(None, description="Product description")
-    price: float = Field(..., ge=0, description="Price in dollars")
-    category: str = Field(..., description="Product category")
-    in_stock: bool = Field(True, description="Whether product is in stock")
-
-# Add your own schemas here:
-# --------------------------------------------------
-
-# Note: The Flames database viewer will automatically:
-# 1. Read these schemas from GET /schema endpoint
-# 2. Use them for document validation when creating/editing
-# 3. Handle all database operations (CRUD) directly
-# 4. You don't need to create any database endpoints!
+    email: EmailStr = Field(..., description="Email address")
+    phone: str = Field(..., description="Phone number")
+    type: Literal['privato','azienda'] = Field('privato', description="Customer type")
+    brand: Optional[str] = Field(None, description="Desired brand")
+    model: Optional[str] = Field(None, description="Desired model")
+    offer_id: Optional[str] = Field(None, description="Selected offer ID if any")
+    preferred_term: Optional[int] = Field(None, ge=12, le=60, description="Preferred months")
+    preferred_km: Optional[int] = Field(None, ge=10000, description="Preferred annual km")
+    budget: Optional[float] = Field(None, ge=0, description="Monthly budget")
+    message: Optional[str] = Field(None, description="Notes / message")
+    company: Optional[str] = Field(None, description="Company name (for business)")
+    vat_number: Optional[str] = Field(None, description="VAT number (for business)")
